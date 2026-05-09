@@ -1,43 +1,20 @@
-export type UserRole = 'admin' | 'organizer' | 'club-head' | 'student'
+export type UserRole = 'student' | 'club-head' | 'organizer' | 'admin'
 
-export interface User {
-  id: string
-  firebase_uid: string
-  email: string
-  name: string
-  name_slug: string
-  role: UserRole
-  enrollment?: string
-  branch?: string
-  year_batch?: number
-  bio?: string
-  linkedin?: string
-  github?: string
-  interests?: string[]
-  avatar_url?: string
-  created_at: string
-}
-
-export interface Club {
-  id: string
-  slug: string
-  name: string
-  tagline?: string
-  description?: string
-  head_id?: string
-  member_count: number
-  social_links?: {
-    instagram?: string
-    linkedin?: string
-    twitter?: string
-    website?: string
-  }
-  is_active: boolean
-  created_at: string
-}
-
-export type EventStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
-export type EventCategory = 'tech' | 'cultural' | 'academic' | 'placement'
+export type EventStatus = 'draft' | 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
+export type EventCategory = 'tech' | 'cultural' | 'academic' | 'sports' | 'placement' | 'general'
+export type RSVPStatus = 'going' | 'waitlisted' | 'cancelled' | 'present' | 'absent'
+export type NewsCategory = 'events' | 'academic' | 'placement' | 'club-news' | 'general'
+export type BulletinCategory = 'lost-found' | 'roommate' | 'book-exchange' | 'internship' | 'general'
+export type ClubMembershipStatus = 'pending' | 'active' | 'rejected'
+export type NotificationType =
+  | 'general'
+  | 'event-rsvp'
+  | 'event-update'
+  | 'attendance'
+  | 'club-membership'
+  | 'bulletin'
+export type EventTaskStatus = 'todo' | 'in-progress' | 'done'
+export type DealCategory = 'food' | 'travel' | 'fashion' | 'education' | 'software' | 'general'
 
 export interface CircleGeofence {
   type: 'circle'
@@ -52,104 +29,150 @@ export interface PolygonGeofence {
 
 export type Geofence = CircleGeofence | PolygonGeofence
 
+export interface User {
+  id: string
+  firebase_uid: string
+  email: string
+  name: string
+  name_slug: string
+  role: UserRole
+  enrollment_number?: string
+  branch?: string
+  year_batch?: number
+  bio?: string
+  avatar_url?: string
+  linkedin_url?: string
+  github_url?: string
+  phone?: string
+  interests?: string[]
+  created_at: string
+  updated_at?: string
+}
+
+export interface Club {
+  id: string
+  slug: string
+  name: string
+  tagline?: string
+  description?: string
+  logo_url?: string
+  banner_url?: string
+  head_user_id?: string
+  member_count: number
+  instagram_url?: string
+  linkedin_url?: string
+  website_url?: string
+  is_active: boolean
+  created_at: string
+  updated_at?: string
+}
+
 export interface Event {
   id: string
   slug: string
   title: string
   description?: string
+  category: EventCategory
+  status: EventStatus
   club_id?: string
-  club_slug?: string
+  organizer_id?: string
   venue_name?: string
   geofence?: Geofence
+  poster_url?: string
+  cover_url?: string
+  thumbnail_url?: string
+  registration_url?: string
   start_time: string
   end_time?: string
-  status: EventStatus
-  category?: EventCategory
   is_featured: boolean
+  capacity?: number
   rsvp_count: number
-  created_by?: string
   created_at: string
+  updated_at?: string
 }
-
-export type RSVPStatus = 'rsvped' | 'present' | 'absent'
 
 export interface RSVP {
   id: string
   event_id: string
   user_id: string
   status: RSVPStatus
-  marked_at?: string
   geo_verified: boolean
+  checked_in_at?: string
+  created_at: string
+  updated_at?: string
 }
 
 export interface TeamMember {
   id: string
   user_id?: string
+  name: string
+  name_slug: string
   role: string
   role_slug: string
   year: number
+  club_slug?: string
   quote?: string
+  bio?: string
+  avatar_url?: string
+  linkedin_url?: string
+  github_url?: string
+  mentor_id?: string
   events_led: number
   is_current: boolean
-  mentor_id?: string
-  name?: string
-  name_slug?: string
-  linkedin?: string
-  github?: string
+  created_at?: string
+  updated_at?: string
 }
-
-export type NewsCategory = 'events' | 'academic' | 'placement' | 'club-news' | 'general'
 
 export interface News {
   id: string
   slug: string
   title: string
   excerpt?: string
-  content?: string
-  category?: NewsCategory
+  content: string
+  category: NewsCategory
   author_id?: string
+  cover_url?: string
   is_pinned: boolean
-  reading_time?: number
+  reading_time_minutes?: number
   published_at: string
   created_at: string
-  author_name?: string
-  author_avatar?: string
+  updated_at?: string
 }
-
-export type BulletinCategory = 'lost-found' | 'roommate' | 'book-exchange' | 'internship' | 'general'
 
 export interface BulletinPost {
   id: string
   title: string
-  description?: string
+  description: string
   category: BulletinCategory
   author_id: string
+  image_url?: string
+  contact_label?: string
+  contact_value?: string
   expires_at?: string
   is_active: boolean
   created_at: string
-  author_name?: string
-  author_avatar?: string
+  updated_at?: string
 }
-
-export type ClubMembershipStatus = 'pending' | 'active' | 'rejected'
 
 export interface ClubMembership {
   id: string
   club_id: string
   user_id: string
   status: ClubMembershipStatus
-  joined_at: string
-  user_name?: string
-  user_avatar?: string
+  role_label?: string
+  joined_at?: string
+  created_at: string
+  updated_at?: string
 }
 
 export interface Notification {
   id: string
   user_id: string
+  type: NotificationType
   title: string
   body?: string
-  type?: string
   ref_id?: string
+  ref_type?: string
   is_read: boolean
   created_at: string
 }
@@ -158,43 +181,44 @@ export interface EventTask {
   id: string
   event_id: string
   title: string
+  description?: string
   assignee_id?: string
+  status: EventTaskStatus
   deadline?: string
-  is_done: boolean
   created_by?: string
   created_at: string
-  assignee_name?: string
+  updated_at?: string
 }
 
 export interface Deal {
   id: string
   title: string
-  company?: string
-  discount?: string
-  category?: string
+  brand_name: string
+  description?: string
+  category: DealCategory
+  discount_text?: string
+  code?: string
   link?: string
+  image_url?: string
   is_active: boolean
   expires_at?: string
+  created_at: string
+  updated_at?: string
 }
 
 export interface ChatMessage {
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'system'
   content: string
   timestamp: string
 }
 
 export interface FeedItem {
-  type: 'event' | 'news' | 'bulletin'
   id: string
+  type: 'event' | 'news' | 'bulletin' | 'deal'
   title: string
   excerpt?: string
-  relevanceScore: number
-  imageUrl?: string
-}
-
-export interface AuthUser {
-  uid: string
-  email: string
-  name: string
-  role: UserRole
+  image_url?: string
+  href?: string
+  relevance_score: number
+  created_at?: string
 }
