@@ -4,10 +4,10 @@ import { verifyAuth } from '@/lib/authMiddleware'
 
 export async function GET() {
   try {
-    const team = await sql`SELECT * FROM team_members WHERE is_current = true ORDER BY created_at ASC`
-    return NextResponse.json(team)
+    const news = await sql`SELECT * FROM news ORDER BY published_at DESC`
+    return NextResponse.json(news)
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch team' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch news' }, { status: 500 })
   }
 }
 
@@ -17,20 +17,20 @@ export async function POST(req: NextRequest) {
 
   try {
     const dbUser = await sql`SELECT role FROM users WHERE firebase_uid = ${user.uid}`
-    if (!dbUser.length || dbUser[0].role !== 'admin') {
+    if (!dbUser.length || !['admin', 'organizer', 'club-head'].includes(dbUser[0].role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const body = await req.json()
-    const { user_id, role_slug, is_current } = body
+    const { slug, title, content, excerpt, category, author_id, is_pinned } = body
 
     const result = await sql`
-      INSERT INTO team_members (user_id, role_slug, is_current)
-      VALUES (${user_id}, ${role_slug}, ${is_current !== undefined ? is_current : true})
+      INSERT INTO news (slug, title, content, excerpt, category, author_id, is_pinned, published_at)
+      VALUES (${slug}, ${title}, ${content}, ${excerpt}, ${category}, ${author_id}, ${is_pinned || false}, NOW())
       RETURNING *
     `
     return NextResponse.json(result[0])
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create team member' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to create news' }, { status: 500 })
   }
 }
